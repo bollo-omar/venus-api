@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  username  String    @unique
+  role      Role      @default(USER)
+  password  String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Customer {
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  firstname          String
+  lastname           String
+  type               ClientType @default(JOB_SEEKER)
+  othername          String?
+  IdNumber           String?    @unique
+  religion           Religion?  @default(CHRISTIAN)
+  gender             Gender?    @default(FEMALE)
+  level_of_education String?
+  createdAt          DateTime?  @default(now())
+  updatedAt          DateTime?  @updatedAt
+  contacts           Contacts[]
+  payments           Payments[]
+}
+
+model Contacts {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  email      String    @unique
+  mobile     String    @unique
+  residence  String
+  street     String?
+  apartment  String?
+  subCounty  String
+  County     String
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+  customerId String    @db.ObjectId
+  customer   Customer? @relation(fields: [customerId], references: [id])
+}
+
+model Payments {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  type      PaymentType? @default(REGISTRATION)
+  amount    Float
+  paidBy    String       @db.ObjectId
+  customer  Customer?    @relation(fields: [paidBy], references: [id])
+  createdAt DateTime?    @default(now())
+  updatedAt DateTime?    @updatedAt
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Religion {
+  CHRISTIAN
+  MUSLIM
+  HINDU
+  OTHER
+}
+
+enum ClientType {
+  EMPLOYER
+  JOB_SEEKER
+}
+
+enum PaymentType {
+  REGISTRATION
+  HOOKUP
+  VETTING
+  CONSULTATION
+}
